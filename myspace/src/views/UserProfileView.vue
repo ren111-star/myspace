@@ -7,10 +7,10 @@
               <UserProfileInfo :user="user" @follow="follow" @unfollow="unfollow"/>
             </div>
           </div>
-          <UserProfileWriter @post_a_post="post_a_post"/>
+          <UserProfileWriter v-if="is_me" @post_a_post="post_a_post"/>
         </div>
         <div class="col-9">
-          <UserProfilePosts :posts="posts"/>
+          <UserProfilePosts :user="user" :posts="posts" @delete_a_post="delete_a_post"/>
         </div>
       </div>
     </ContentBase>
@@ -26,6 +26,7 @@
   import { useRoute } from 'vue-router';
   import $ from 'jquery'
   import { useStore } from 'vuex';
+  import { computed } from 'vue';
     
   export default {
     name: 'UserProfileView',
@@ -37,7 +38,7 @@
     },
     setup() {
       const route = useRoute();
-      const userId = route.params.userId;
+      const userId = parseInt(route.params.userId);
       const store = useStore();
 
       const user = reactive({
@@ -45,6 +46,21 @@
 
       const posts = reactive({
       });
+
+      $.ajax({
+        url: "https://app165.acapp.acwing.com.cn/myspace/post/",
+        type: "get",
+        data: {
+          user_id: userId,
+        },
+        headers: {
+          'Authorization': "Bearer " + store.state.user.access,
+        },
+        success(resp) {
+          posts.count = resp.length
+          posts.posts = resp
+        }
+      })
 
       $.ajax({
         url: "https://app165.acapp.acwing.com.cn/myspace/getinfo/",
@@ -56,7 +72,6 @@
           'Authorization' : "Bearer " + store.state.user.access,
         },
         success(resp) {
-          console.log(resp);
           user.id = resp.id;
           user.username = resp.username;
           user.photo = resp.photo;
@@ -77,21 +92,29 @@
         user.followCount --;
       };
 
-      const post_a_post = (content) =>{
-        posts.count++,
+      const post_a_post = content =>{
         posts.posts.unshift({
-          id: posts.count,
+          id: posts.count + 1,
           userId: 1,
           content: content,
         })
+      };
+
+      const delete_a_post = post_id => {
+        posts.posts = posts.posts.filter(post => post.id !== post_id);
+        posts.count = posts.posts.length;
       }
+
+      const is_me = computed(() => userId === store.state.user.id);
 
       return {
         user,
         follow,
         unfollow,
         posts,
-        post_a_post
+        post_a_post,
+        is_me,
+        delete_a_post
       }
     }
   }
