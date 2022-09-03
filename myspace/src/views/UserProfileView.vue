@@ -83,13 +83,13 @@
       const follow = () => {
         if (user.is_followed) return;
         user.is_followed = true;
-        user.followCount ++;
+        user.followerCount ++;
       };
 
       const unfollow = () => {
         if (!user.is_followed) return;
         user.is_followed = false;
-        user.followCount --;
+        user.followerCount --;
       };
 
       const post_a_post = content =>{

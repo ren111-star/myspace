@@ -38,8 +38,10 @@ export default {
                     'Authorization': "Bearer " + store.state.user.access
                 },
                 success(resp) {
+                    
                     if (resp.result === "success") {
                         context.emit('follow');
+                        console.log("follow")
                     }
                 }
             })
@@ -58,6 +60,7 @@ export default {
                 success(resp) {
                     if (resp.result === "success") {
                         context.emit('unfollow');
+                        console.log("unfollow")
                     }
                 }
             })
